@@ -18,7 +18,7 @@ client.on('ready', () => {
 // Handle received messages
 client.on('message', async message => {
   // Ignore the message if it's not a command
-  if (!message.content.startsWith(commandChar)) {
+  if (!message.content.startsWith(commandChar) || !message.guild) {
     return;
   }
   // Ignore the command char, then loop the commands in the config
@@ -28,7 +28,7 @@ client.on('message', async message => {
       if (command.message) {
         message.channel.send(command.message);
       }
-      if (command.audio_path) {
+      if (message.member.voiceChannel && command.audio_path) {
         // Send the audio clip to the voice channel user was in
         const connection = await message.member.voiceChannel.join();
         const dispatcher = connection.playFile(command.audio_path);
