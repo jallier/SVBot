@@ -32,25 +32,7 @@ client.on('message', async message => {
         message.channel.send(command.message);
       }
       if (message.member.voiceChannel && command.audio_path) {
-        // Send the audio clip to the voice channel user was in
-        let connection: Discord.VoiceConnection;
-        try {
-          connection = await message.member.voiceChannel.join();
-          if (voiceQueue.isEmpty()) {
-            voiceQueue.enqueueAudio(command.audio_path);
-            voiceQueue.playQueue(connection);
-          } else {
-            voiceQueue.enqueueAudio(command.audio_path);
-          }
-        } catch (e) {
-          console.log(e);
-          return;
-        }
-
-        // Leave channel after command is played
-        // dispatcher.on('end', () => {
-        //   connection.disconnect();
-        // });
+        voiceQueue.addAudio(command.audio_path, message);
       }
     }
   }
