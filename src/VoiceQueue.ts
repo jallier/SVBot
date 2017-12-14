@@ -9,7 +9,6 @@ export class VoiceQueue {
   constructor() {
     this._queue = new Queue();
     this._isPlaying = false;
-    // this._voiceConnection = voiceConnection;
   }
 
   public addAudio(path: string, message: Discord.Message) {
@@ -22,10 +21,6 @@ export class VoiceQueue {
   }
 
   private async playQueue() {
-    // while (!this._queue.isEmpty()) {
-    //   let path = this._queue.dequeue();
-    //   let dispatcher = voiceConnection.playFile(path);
-    // }
     let items = this._queue.dequeue();
     if (!this._voiceConnection) {
       console.log('joining channel');

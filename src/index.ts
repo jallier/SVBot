@@ -4,7 +4,6 @@ import { Queue } from 'typescript-collections';
 import { Config } from './Config';
 import { VoiceQueue } from './VoiceQueue';
 
-// Create the Discord client and parse the config
 const client = new Discord.Client();
 let voiceQueue = new VoiceQueue();
 
@@ -24,7 +23,6 @@ client.on('message', async message => {
   if (!message.content.startsWith(commandChar) || !message.guild) {
     return;
   }
-  // Ignore the command char, then loop the commands in the config
   const messageStr = message.content.substring(1);
   for (let command of config.commands) {
     if (command.name === messageStr) {
@@ -37,3 +35,12 @@ client.on('message', async message => {
     }
   }
 });
+
+
+/**
+ * TODO: 
+ * - Clean up the code
+ * - Add a proper logging lib (Winston)
+ * - Add file watching to reload on config change
+ * - Add commands in DC itself?
+ */
