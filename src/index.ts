@@ -7,17 +7,18 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './Config';
 import { VoiceQueue } from './VoiceQueue';
-import { firstrun } from './firstRun';
+import { firstrun } from './functions/firstRun';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 
+// Generate config file
 firstrun();
-
-const client = new Discord.Client();
-let voiceQueue = new VoiceQueue();
 
 const config: Config = JSON.parse(fs.readFileSync('config.json').toString());
 const commandChar: string = config.command_char;
+
+const client = new Discord.Client();
+let voiceQueue = new VoiceQueue();
 
 client.login(config.token);
 

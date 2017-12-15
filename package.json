@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc --watch",
-    "watch": "nodemon \"dist/index.js\" --watch \"dist/*.js\" --watch \"config.json\" ",
-    "start": "concurrently \"npm run compile\" \"npm run watch\" "
+    "start": "nodemon \"dist/index.js\" --watch \"dist/*.js\" --watch \"config.json\" ",
+    "dev": "concurrently \"npm run compile\" \"npm run start\" "
   },
   "keywords": [
     "discord"
