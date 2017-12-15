@@ -1,3 +1,7 @@
+/**
+ * WINDOWS BRANCH: libsodium is on 2.0.1 for windows until it is fixed upstream.
+ * This should be the only difference between the windows branch and the main branch.
+ */
 import * as fs from 'fs';
 import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
@@ -39,8 +43,9 @@ client.on('message', async message => {
 
 /**
  * TODO: 
- * - Clean up the code
+ * - Add config file if it doesn't exist
+ *    - Interactive run for first set up
  * - Add a proper logging lib (Winston)
- * - Add file watching to reload on config change
+ * - Add multiple audio for one command
  * - Add commands in DC itself?
  */
