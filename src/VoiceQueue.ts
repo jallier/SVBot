@@ -3,6 +3,9 @@ import * as Discord from 'discord.js';
 import { logger } from './logger';
 import { getFullTextChannelName } from './functions/Channels';
 
+/**
+ * Class to manage queuing and playing of audio clips
+ */
 export class VoiceQueue {
   private _queue: Queue<{ path: string; message: Discord.Message }>;
   private _voiceConnection: Discord.VoiceConnection | null;
@@ -13,6 +16,12 @@ export class VoiceQueue {
     this._isPlaying = false;
   }
 
+  /**
+   * Add an audio path to the internal queue for playing.
+   * If the clip is the only thing in the queue, start playing.
+   * @param path absolute path to the file to play
+   * @param message Discord message that requested the clip
+   */
   public addAudio(path: string, message: Discord.Message) {
     logger.info(`Received ${message.content}. Adding ${path} to queue`);
     this._queue.enqueue({ path, message });
@@ -22,6 +31,9 @@ export class VoiceQueue {
     }
   }
 
+  /**
+   * Play the queue. When the end is reached, recursively call function on remaining items
+   */
   private async playQueue() {
     let items = this._queue.dequeue();
     if (!this._voiceConnection) {

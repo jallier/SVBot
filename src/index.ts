@@ -5,7 +5,7 @@
 import * as fs from 'fs';
 import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
-import { Config } from './Config';
+import { Config } from './interfaces/Config';
 import { VoiceQueue } from './VoiceQueue';
 import { firstrun } from './functions/firstRun';
 import { logger } from './logger';
@@ -33,16 +33,21 @@ client.on('message', async message => {
   if (!message.content.startsWith(commandChar) || !message.guild) {
     return;
   }
+  // Loop through all the saved commands, break on one that matches.
   const messageStr = message.content.substring(1);
   for (let command of config.commands) {
     if (command.name === messageStr) {
+      // Send text message to channel
       if (command.message) {
         logger.info(`Sending '${command.message}' to ${message.guild.name}#${castToTextChannel(message.channel).name}`)
         message.channel.send(command.message);
       }
+      // Send voice clip to channel
       if (message.member.voiceChannel && command.audio_path) {
         voiceQueue.addAudio(command.audio_path, message);
       }
+      // Only loop as far as needed
+      break;
     }
   }
 });
