@@ -7,6 +7,9 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './Config';
 import { VoiceQueue } from './VoiceQueue';
+import { firstrun } from './firstRun';
+
+firstrun();
 
 const client = new Discord.Client();
 let voiceQueue = new VoiceQueue();
