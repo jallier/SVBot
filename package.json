@@ -19,9 +19,6 @@
     "@types/winston": "^2.3.7",
     "discord.js": "^11.2.1",
     "erlpack": "github:discordapp/erlpack",
-    "eslint": "^4.12.1",
-    "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.8.0",
     "ffmpeg-binaries": "^3.2.2-3",
     "moment": "^2.19.4",
     "node-opus": "^0.2.7",
@@ -35,6 +32,7 @@
   "devDependencies": {
     "concurrently": "^3.5.1",
     "nodemon": "^1.12.5",
-    "tslint": "^5.8.0"
+    "tslint": "^5.8.0",
+    "tslint-config-airbnb": "^5.4.2"
   }
 }

@@ -1,6 +1,9 @@
 {
   "extends": "tslint-config-airbnb",
   "rules": {
+    "no-else-after-return": false,
+    "max-line-length": false,
+    "no-boolean-literal-compare": true,
     "class-name": true,
     "indent": [true, "spaces"],
     "one-line": [true, "check-open-brace", "check-whitespace"],
