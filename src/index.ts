@@ -7,7 +7,7 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
 import { VoiceQueue } from './VoiceQueue';
-import { firstrun } from './functions/firstRun';
+import { firstrun } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 
@@ -18,7 +18,7 @@ const config: Config = JSON.parse(fs.readFileSync('config.json').toString());
 const commandChar: string = config.command_char;
 
 const client = new Discord.Client();
-let voiceQueue = new VoiceQueue();
+const voiceQueue = new VoiceQueue();
 
 client.login(config.token);
 
@@ -28,18 +28,26 @@ client.on('ready', () => {
 });
 
 // Handle received messages
-client.on('message', async message => {
+client.on('message', async (message) => {
   // Ignore the message if it's not a command
   if (!message.content.startsWith(commandChar) || !message.guild) {
+    return;
+  } else if (message.content.startsWith(commandChar) && message.content.substring(1) === 'desc') {
+    // Print all commands and descriptions
+    let output = '';
+    for (const command of config.commands) {
+      output += `${config.command_char}${command.name}: ${command.description}\n`;
+    }
+    message.channel.send(output);
     return;
   }
   // Loop through all the saved commands, break on one that matches.
   const messageStr = message.content.substring(1);
-  for (let command of config.commands) {
+  for (const command of config.commands) {
     if (command.name === messageStr) {
       // Send text message to channel
       if (command.message) {
-        logger.info(`Sending '${command.message}' to ${message.guild.name}#${castToTextChannel(message.channel).name}`)
+        logger.info(`Sending '${command.message}' to ${message.guild.name}#${castToTextChannel(message.channel).name}`);
         message.channel.send(command.message);
       }
       // Send voice clip to channel
@@ -54,11 +62,9 @@ client.on('message', async message => {
 
 
 /**
- * TODO: 
+ * TODO:
  * - Add config file if it doesn't exist
  *    - Interactive run for first set up
- * - Add a proper logging lib (Winston)
- * - Add description command to list all availale commands
  * - Add multiple audio for one command
  * - Add commands in DC itself?
  */
