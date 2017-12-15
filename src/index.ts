@@ -8,6 +8,8 @@ import { Queue } from 'typescript-collections';
 import { Config } from './Config';
 import { VoiceQueue } from './VoiceQueue';
 import { firstrun } from './firstRun';
+import { logger } from './logger';
+import { castToTextChannel } from './functions/Channels';
 
 firstrun();
 
@@ -21,7 +23,7 @@ client.login(config.token);
 
 // Log that the bot is ready to go
 client.on('ready', () => {
-  console.log('I am ready');
+  logger.info('Bot has successfully started');
 });
 
 // Handle received messages
@@ -34,6 +36,7 @@ client.on('message', async message => {
   for (let command of config.commands) {
     if (command.name === messageStr) {
       if (command.message) {
+        logger.info(`Sending '${command.message}' to ${message.guild.name}#${castToTextChannel(message.channel).name}`)
         message.channel.send(command.message);
       }
       if (message.member.voiceChannel && command.audio_path) {
@@ -49,6 +52,7 @@ client.on('message', async message => {
  * - Add config file if it doesn't exist
  *    - Interactive run for first set up
  * - Add a proper logging lib (Winston)
+ * - Add description command to list all availale commands
  * - Add multiple audio for one command
  * - Add commands in DC itself?
  */
