@@ -35,7 +35,7 @@ export class VoiceQueue {
    * Play the queue. When the end is reached, recursively call function on remaining items
    */
   private async playQueue() {
-    let items = this._queue.dequeue();
+    const items = this._queue.dequeue();
     if (!this._voiceConnection) {
       logger.info(`joining channel ${getFullTextChannelName(items.message)}`);
       this._voiceConnection = await items.message.member.voiceChannel.join();
@@ -43,8 +43,8 @@ export class VoiceQueue {
     }
     logger.info(`Playing file ${items.path}`);
     this._isPlaying = true;
-    let dispatcher = this._voiceConnection.playFile(items.path);
-    dispatcher.on('end', reason => {
+    const dispatcher = this._voiceConnection.playFile(items.path);
+    dispatcher.on('end', (reason) => {
       logger.info('player finished:', reason);
       if (this._queue.isEmpty()) {
         this._isPlaying = false;
@@ -54,7 +54,7 @@ export class VoiceQueue {
       } else {
         logger.info(`Queue empty; Leaving channel ${getFullTextChannelName(items.message)}`);
         this._voiceConnection.disconnect();
-        this._voiceConnection = null;
+        this._voiceConnection = undefined;
       }
     });
   }
