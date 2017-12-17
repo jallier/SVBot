@@ -42,5 +42,4 @@
     "no-null-keyword": true,
     "jsdoc-format": true
   }
-  // "extends": ["tslint:latest", "tslint-config-prettier"]
 }
