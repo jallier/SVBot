@@ -77,7 +77,8 @@ client.on('message', async (message) => {
 
 /**
  * TODO:
+ * - Add commands in DC itself?
+ * - Shards for multiple servers at once
  * - Add config file if it doesn't exist
  *    - Interactive run for first set up
- * - Add commands in DC itself?
  */

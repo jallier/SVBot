@@ -36,7 +36,7 @@ export class VoiceQueue {
    */
   private async playQueue() {
     const items = this._queue.dequeue();
-    if (!this._voiceConnection) {
+    if (!this._voiceConnection || items.message.member.voiceChannel.id !== this._voiceConnection.channel.id) {
       logger.info(`joining channel ${getFullTextChannelName(items.message)}`);
       this._voiceConnection = await items.message.member.voiceChannel.join();
       logger.info(`joined channel ${getFullTextChannelName(items.message)}`);
