@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { logger } from '../logger';
-import { Collection, MessageAttachment } from 'discord.js';
+import { Collection, MessageAttachment, Message } from 'discord.js';
+import * as path from 'path';
 
 export function firstrun() {
   if (!fs.existsSync('config.json')) {
@@ -34,6 +35,31 @@ export function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function messageAttachmentsAreAudio(attachements: Collection<string, MessageAttachment>) {
-  // TODO: build this function.
+/**
+ * Gets the urls of message attachments.
+ * Returns collection of attachment urls with filename for key
+ * @param attachements Collection of message attachments
+ */
+function getMessageAttachmentsUrls(
+  attachements: Collection<string, MessageAttachment>,
+) {
+  const output = new Collection<string, string>();
+  for (const i of attachements.entries()) {
+    logger.info(`Recieved file with url: ${i[1].url}`);
+    output.set(i[1].filename, i[1].url);
+  }
+  return output;
+}
+
+/**
+ * Downloads attachments from message
+ * @param attachements Attachment collention
+ */
+export function downloadAttachments(
+  attachements: Collection<string, MessageAttachment>,
+) {
+  const attachments = getMessageAttachmentsUrls(attachements);
+  logger.info(path.dirname(require.main.filename));
+  for (const i of attachements.entries()) {
+  }
 }
