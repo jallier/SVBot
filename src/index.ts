@@ -7,7 +7,7 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
 import { VoiceQueue } from './VoiceQueue';
-import { firstrun, getRandomInt } from './functions/Misc';
+import { firstrun, getRandomInt, messageAttachmentsAreAudio } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 
@@ -29,6 +29,11 @@ client.on('ready', () => {
 
 // Handle received messages
 client.on('message', async (message) => {
+  // Handle bot mentions
+  if (message.mentions.users.exists('username', client.user.username)) {
+    logger.info('Bot was mentioned');
+    message.reply('you called?');
+  }
   // Ignore the message if it's not a command
   if (!message.content.startsWith(commandChar) || !message.guild) {
     return;

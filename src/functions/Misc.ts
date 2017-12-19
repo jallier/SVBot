@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { logger } from '../logger';
+import { Collection, MessageAttachment } from 'discord.js';
 
 export function firstrun() {
   if (!fs.existsSync('config.json')) {
@@ -31,4 +32,8 @@ export function firstrun() {
  */
 export function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function messageAttachmentsAreAudio(attachements: Collection<string, MessageAttachment>) {
+  // TODO: build this function.
 }
