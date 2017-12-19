@@ -32,7 +32,7 @@ client.on('message', async (message) => {
   // Ignore the message if it's not a command
   if (!message.content.startsWith(commandChar) || !message.guild) {
     return;
-  } else if (message.content.startsWith(commandChar) && message.content.substring(1) === 'desc') {
+  } else if (message.content.startsWith(commandChar) && ['desc', 'description'].indexOf(message.content.substring(1)) > -1) {
     // Print all commands and descriptions
     let output = '';
     for (const command of config.commands) {
