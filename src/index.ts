@@ -7,11 +7,7 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
 import { VoiceQueue } from './VoiceQueue';
-import {
-  firstrun,
-  getRandomInt,
-  downloadAttachments,
-} from './functions/Misc';
+import { firstrun, getRandomInt, downloadAttachments } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 
@@ -37,9 +33,10 @@ client.on('message', async (message) => {
   if (message.mentions.users.exists('username', client.user.username)) {
     logger.info(`Bot was mentioned by ${message.author.username}`);
     message.reply('you called?');
-    if(message.attachments){
+    if (message.attachments) {
       logger.info('Message has attachments; downloading');
-      downloadAttachments(message.attachments);
+      downloadAttachments(config.audio_path, message.attachments);
+      message.reply('you uploaded an audio file. If you want to turn this into a command, ');
     }
   }
   // Ignore the message if it's not a command
@@ -64,20 +61,20 @@ client.on('message', async (message) => {
         message.channel.send(command.message);
       }
       // Send voice clip to channel
-      if (message.member.voiceChannel && command.audio_path) {
+      if (message.member.voiceChannel && command.audio_file) {
         // If command is not a multi, ignore any args given
-        if (!Array.isArray(command.audio_path)) {
-          voiceQueue.addAudio(command.audio_path, message);
+        if (!Array.isArray(command.audio_file)) {
+          voiceQueue.addAudio(config.audio_path + command.audio_file, message);
         } else {
           // message doesn't contain args; get random index
           if (messageContents.length === 1) {
-            const index = getRandomInt(0, command.audio_path.length - 1);
+            const index = getRandomInt(0, command.audio_file.length - 1);
             logger.debug('index is: ' + index);
-            voiceQueue.addAudio(command.audio_path[index], message);
+            voiceQueue.addAudio(config.audio_path + command.audio_file[index], message);
           } else {
             // Message has args; use them to get the specified audio path
-            const index = Number(messageContents[1]) - 1 < command.audio_path.length ? Number(messageContents[1]) - 1 : command.audio_path.length - 1;
-            voiceQueue.addAudio(command.audio_path[index], message);
+            const index = Number(messageContents[1]) - 1 < command.audio_file.length ? Number(messageContents[1]) - 1 : command.audio_file.length - 1;
+            voiceQueue.addAudio(config.audio_path + command.audio_file[index], message);
           }
         }
       }
