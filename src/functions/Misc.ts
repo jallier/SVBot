@@ -3,6 +3,7 @@ import { logger } from '../logger';
 import { Collection, MessageAttachment, Message } from 'discord.js';
 import * as path from 'path';
 import * as https from 'https';
+import * as request from 'request';
 
 export function firstrun() {
   if (!fs.existsSync('config.json')) {
@@ -44,7 +45,6 @@ export function getRandomInt(min: number, max: number) {
 function getMessageAttachmentsUrls(attachements: Collection<string, MessageAttachment>) {
   const output = new Collection<string, string>();
   for (const i of attachements.entries()) {
-    logger.info(`Recieved file with url: ${i[1].url}`);
     output.set(i[1].filename, i[1].url);
   }
   return output;
@@ -58,17 +58,25 @@ export function downloadAttachments(dir: string, inputAttachments: Collection<st
   const attachments = getMessageAttachmentsUrls(inputAttachments);
   for (const attachment of attachments.entries()) {
     const path = dir + attachment[0];
-    const file = fs.createWriteStream(path, { flags: 'wx' });
-    const req = https.get(attachment[1], (res) => {
-      // Fuck this, just use request (with promises)
-      res.pipe(file);
-      file.on('finish', () => {
-        file.close();
-      });
-      file.on('error', (error) => {
-        fs.unlink(path, () => { });
-        logger.error(error.message);
-      });
+    const url = attachment[1];
+    logger.info(`Received file with url: ${url}. Writing to ${path}`);
+    const stream = fs.createWriteStream(path, { flags: 'wx' });
+    stream.on('error', (e) => {
+      logger.error('File ', e);
+      fs.unlink(path, () => { });
     });
+    request.get(url)
+      .on('error', (e) => {
+        logger.error('http error', e.message);
+        fs.unlink(path, () => { });
+      })
+      .on('response', (res) => {
+        if (res.statusCode === 200) {
+          res.pipe(stream).on('error', (e) => {
+            logger.error('File error: ', e);
+            fs.unlink(path, () => { });
+          });
+        }
+      });
   }
 }

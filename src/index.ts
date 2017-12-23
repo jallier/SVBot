@@ -32,11 +32,12 @@ client.on('message', async (message) => {
   // Handle bot mentions
   if (message.mentions.users.exists('username', client.user.username)) {
     logger.info(`Bot was mentioned by ${message.author.username}`);
-    message.reply('you called?');
-    if (message.attachments) {
+    if (message.attachments.size > 0) {
       logger.info('Message has attachments; downloading');
       downloadAttachments(config.audio_path, message.attachments);
-      message.reply('you uploaded an audio file. If you want to turn this into a command, ');
+      message.reply('you uploaded an audio file. If you want to turn this into a command, reply "@dcbot <command>');
+    } else {
+      message.reply('you called?');
     }
   }
   // Ignore the message if it's not a command
