@@ -3,6 +3,7 @@ import { logger } from '../logger';
 import * as fs from 'fs';
 import * as request from 'request';
 import { WriteStream } from 'fs';
+import * as pathm from 'path';
 
 export enum AddCommandStatus {
   initialMessage,
@@ -72,27 +73,8 @@ export class AddCommandState {
       }
       const path = dir + attachment[0];
       const url = attachment[1];
-      logger.info(`Received file with url: ${url}. Writing to ${path}`);
-      // const stream = fs.createWriteStream(path, { flags: 'wx' });
-      // stream.on('error', (e) => {
-      //   logger.error('File ', e);
-      //   fs.unlink(path, () => { });
-      // });
-      // request.get(url)
-      //   .on('error', (e) => {
-      //     logger.error('http error', e.message);
-      //     fs.unlink(path, () => { });
-      //   })
-      //   .on('response', (res) => {
-      //     if (res.statusCode === 200) {
-      //       res.pipe(stream).on('error', (e) => {
-      //         logger.error('File error: ', e);
-      //         fs.unlink(path, () => { });
-      //       });
-      //       paths.push(path);
-      //     }
-      //   });
-      let filePath;
+      logger.info(`Received file with url: ${url}`);
+      let filePath: string;
       try {
         filePath = await this._downloadFileAsync(path, url);
       } catch (e) {
@@ -105,38 +87,48 @@ export class AddCommandState {
 
   private _downloadFileAsync(path: string, url: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const stream = fs.createWriteStream(path, { flags: 'wx' });
-      stream
-        .on('error', (e) => {
-          logger.error('File ', e);
-          fs.unlink(path, () => { });
-          reject(e);
-        })
-        .on('finish', () => {
-          logger.info('File written');
-          resolve(path);
-        });
-      request.get(url)
-        .on('error', (e) => {
-          logger.error('http error', e.message);
-          fs.unlink(path, () => { });
-          reject(e);
-        })
-        .on('response', (res) => {
-          if (res.statusCode === 200) {
-            res.pipe(stream)
-              .on('error', (e) => {
-                logger.error('File error: ', e);
-                fs.unlink(path, () => { });
-                reject(e);
-              })
-              .on('finish', () => {
-                logger.info('http stream ended');
-                stream.end();
-              });
-            // paths.push(path);
+      fs.open(path, 'wx', (err, fd) => {
+        if (err) {
+          if (err.code === 'EEXIST') {
+            logger.info('File already exists');
+            const newPath = pathm.parse(path);
+            newPath.name += '_new';
+            newPath.base = newPath.name + newPath.ext;
+            return this._downloadFileAsync(pathm.format(newPath), url);
           }
-        });
+          throw err;
+        }
+        const stream = fs.createWriteStream('', { fd });
+        stream
+          .on('error', (e) => {
+            logger.error('File ', e);
+            fs.unlink(path, () => { });
+            reject(e);
+          })
+          .on('finish', () => {
+            logger.info(`File written to ${path}`);
+            resolve(path); // Return the path where the file was downloaded to.
+          });
+        request.get(url)
+          .on('error', (e) => {
+            logger.error('http error', e.message);
+            fs.unlink(path, () => { });
+            reject(e);
+          })
+          .on('response', (res) => {
+            if (res.statusCode === 200) {
+              res.pipe(stream)
+                .on('error', (e) => {
+                  logger.error('File error: ', e);
+                  fs.unlink(path, () => { });
+                  reject(e);
+                })
+                .on('finish', () => {
+                  stream.end();
+                });
+            }
+          });
+      });
     });
   }
 }
