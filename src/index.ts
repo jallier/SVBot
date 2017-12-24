@@ -6,10 +6,11 @@ import * as fs from 'fs';
 import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
-import { VoiceQueue } from './VoiceQueue';
+import { VoiceQueue } from './Classes/VoiceQueue';
 import { firstrun, getRandomInt, downloadAttachments } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
+import { AddCommandState, AddCommandStatus } from './Classes/AddCommandState';
 
 // Generate config file
 firstrun();
@@ -19,6 +20,7 @@ const commandChar: string = config.command_char;
 
 const client = new Discord.Client();
 const voiceQueue = new VoiceQueue();
+const userMentions: Discord.Collection<string, AddCommandState> = new Discord.Collection();
 
 client.login(config.token);
 
@@ -28,17 +30,43 @@ client.on('ready', () => {
 });
 
 // Handle received messages
-client.on('message', async (message) => {
+client.on('message', (message) => {
   // Handle bot mentions
   if (message.mentions.users.exists('username', client.user.username)) {
     logger.info(`Bot was mentioned by ${message.author.username}`);
-    if (message.attachments.size > 0) {
-      logger.info('Message has attachments; downloading');
-      downloadAttachments(config.audio_path, message.attachments);
-      message.reply('you uploaded an audio file. If you want to turn this into a command, reply "@dcbot <command>');
-    } else {
-      message.reply('you called?');
+    // If the user already exists, read state and process accordingly
+    let state;
+    if (userMentions.has(message.author.username)) {
+      state = userMentions.get(message.author.username);
+    } else { // User does not exist, add to collection and process
+      state = new AddCommandState(message.author);
+      userMentions.set(message.author.username, state);
     }
+    switch (state.state) {
+      case AddCommandStatus.initialMessage:
+        if (message.attachments.size > 0) {
+          state.downloadAttachments(config.audio_path, message.attachments);
+          message.reply(`you uploaded an audio file. If you want to turn this into a command, reply ${client.user.username} <command>`);
+          state.advanceState();
+        }
+        break;
+      case AddCommandStatus.awaitingCommand:
+        logger.info('User is adding command');
+        logger.info('User sent', message.content);
+        if (message.content.split(' ')[1].startsWith(commandChar)) {
+          message.reply(`Adding command ${message.content}`);
+          userMentions.delete(message.author.username);
+        }
+        break;
+    }
+    // if (message.attachments.size > 0) {
+    //   logger.info('Message has attachments; downloading');
+    //   downloadAttachments(config.audio_path, message.attachments);
+    //   message.reply('you uploaded an audio file. If you want to turn this into a command, reply "@dcbot <command>');
+    // } else {
+    //   message.reply('you called?');
+    // }
+    return;
   }
   // Ignore the message if it's not a command
   if (!message.content.startsWith(commandChar) || !message.guild) {

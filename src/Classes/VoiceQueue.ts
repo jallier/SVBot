@@ -1,7 +1,7 @@
 import { Queue } from 'typescript-collections';
 import * as Discord from 'discord.js';
-import { logger } from './logger';
-import { getFullTextChannelName } from './functions/Channels';
+import { logger } from '../logger';
+import { getFullTextChannelName } from '../functions/Channels';
 
 /**
  * Class to manage queuing and playing of audio clips

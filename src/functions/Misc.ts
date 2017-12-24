@@ -42,7 +42,7 @@ export function getRandomInt(min: number, max: number) {
  * Returns collection of attachment urls with filename for key
  * @param attachements Collection of message attachments
  */
-function getMessageAttachmentsUrls(attachements: Collection<string, MessageAttachment>) {
+export function getMessageAttachmentsUrls(attachements: Collection<string, MessageAttachment>) {
   const output = new Collection<string, string>();
   for (const i of attachements.entries()) {
     output.set(i[1].filename, i[1].url);
@@ -50,13 +50,25 @@ function getMessageAttachmentsUrls(attachements: Collection<string, MessageAttac
   return output;
 }
 
+export function isAudio(attachment: string) {
+  if (['mp3', 'wav'].indexOf(attachment) > -1) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * Downloads attachments from message
- * @param attachements Attachment collention
+ * @param attachments Attachment collention
  */
 export function downloadAttachments(dir: string, inputAttachments: Collection<string, MessageAttachment>) {
   const attachments = getMessageAttachmentsUrls(inputAttachments);
+  const paths: string[] = [];
   for (const attachment of attachments.entries()) {
+    if (!isAudio(attachment[0])) {
+      // If the given file isn't audio, just skip it
+      continue;
+    }
     const path = dir + attachment[0];
     const url = attachment[1];
     logger.info(`Received file with url: ${url}. Writing to ${path}`);
@@ -76,7 +88,9 @@ export function downloadAttachments(dir: string, inputAttachments: Collection<st
             logger.error('File error: ', e);
             fs.unlink(path, () => { });
           });
+          paths.push(path);
         }
       });
   }
+  return paths;
 }
