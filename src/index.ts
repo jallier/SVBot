@@ -53,8 +53,12 @@ client.on('message', (message) => {
       case AddCommandStatus.awaitingCommand:
         logger.info('User is adding command');
         logger.info('User sent', message.content);
-        if (message.content.split(' ')[1].startsWith(commandChar)) {
-          message.reply(`Adding command ${message.content}`);
+        const command = message.content.split(' ')[1];
+        if (command.startsWith(commandChar)) {
+          message.reply(`Adding command ${command}`);
+          logger.info(`Adding command ${command} with path ${state.attachmentPaths[0]}`);
+          config.commands.push({ name: command.substring(1), description: 'User added command', audio_file: state.attachmentPaths[0] });
+          logger.info(`${JSON.stringify(config, undefined, 2)}`);
           userMentions.delete(message.author.username);
         }
         break;

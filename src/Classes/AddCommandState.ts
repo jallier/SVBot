@@ -14,7 +14,7 @@ export class AddCommandState {
   public state: AddCommandStatus;
   public user: User;
   public urls: string[];
-  private attachmentPaths: string[];
+  public attachmentPaths: string[];
 
   constructor(user: User) {
     this.state = AddCommandStatus.initialMessage;
@@ -80,6 +80,7 @@ export class AddCommandState {
       } catch (e) {
         logger.error(e);
       }
+      logger.info(`Downloaded file to ${filePath}`);
       paths.push(filePath);
     }
     return paths;
@@ -90,6 +91,7 @@ export class AddCommandState {
       fs.open(path, 'wx', (err, fd) => {
         if (err) {
           if (err.code === 'EEXIST') {
+            // TODO: Fix this not working properly. Look into promise.deferred https://mostafa-samir.github.io/async-recursive-patterns-pt2/
             logger.info('File already exists');
             const newPath = pathm.parse(path);
             newPath.name += '_new';
