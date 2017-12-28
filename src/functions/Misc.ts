@@ -94,3 +94,10 @@ export function downloadAttachments(dir: string, inputAttachments: Collection<st
   }
   return paths;
 }
+
+export function getFullPath(audioFile: string, audioPath: string) {
+  if (path.isAbsolute(audioFile)) {
+    return audioFile;
+  }
+  return audioPath + audioFile;
+}

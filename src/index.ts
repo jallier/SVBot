@@ -7,7 +7,7 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
 import { VoiceQueue } from './Classes/VoiceQueue';
-import { firstrun, getRandomInt, downloadAttachments } from './functions/Misc';
+import { firstrun, getRandomInt, downloadAttachments, getFullPath } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 import { AddCommandState, AddCommandStatus } from './Classes/AddCommandState';
@@ -97,7 +97,7 @@ client.on('message', (message) => {
       if (message.member.voiceChannel && command.audio_file) {
         // If command is not a multi, ignore any args given
         if (!Array.isArray(command.audio_file)) {
-          voiceQueue.addAudio(config.audio_path + command.audio_file, message);
+          voiceQueue.addAudio(getFullPath(command.audio_file, config.audio_path), message);
         } else {
           // message doesn't contain args; get random index
           if (messageContents.length === 1) {
