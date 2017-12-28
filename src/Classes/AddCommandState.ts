@@ -71,7 +71,7 @@ export class AddCommandState {
         // If the given file isn't audio, just skip it
         continue;
       }
-      const path = dir + attachment[0];
+      const path = dir + attachment[0]; // TODO: Fix this breaking the path in the config
       const url = attachment[1];
       logger.info(`Received file with url: ${url}`);
       let filePath: string;
@@ -91,12 +91,11 @@ export class AddCommandState {
       fs.open(path, 'wx', (err, fd) => {
         if (err) {
           if (err.code === 'EEXIST') {
-            // TODO: Fix this not working properly. Look into promise.deferred https://mostafa-samir.github.io/async-recursive-patterns-pt2/
             logger.info('File already exists');
             const newPath = pathm.parse(path);
             newPath.name += '_new';
             newPath.base = newPath.name + newPath.ext;
-            return this._downloadFileAsync(pathm.format(newPath), url);
+            return resolve(pathm.format(newPath));
           }
           throw err;
         }
@@ -131,6 +130,9 @@ export class AddCommandState {
             }
           });
       });
+    }).then((data: string) => {
+      logger.info('Resolved');
+      return data === path ? data : this._downloadFileAsync(data, url);
     });
   }
 }

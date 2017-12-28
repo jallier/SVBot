@@ -46,7 +46,7 @@ client.on('message', (message) => {
       case AddCommandStatus.initialMessage:
         if (message.attachments.size > 0) {
           state.downloadAttachments(config.audio_path, message.attachments);
-          message.reply(`you uploaded an audio file. If you want to turn this into a command, reply ${client.user.username} <command>`);
+          message.reply(`you uploaded an audio file. If you want to turn this into a command, reply @${client.user.username} <command>`);
           state.advanceState();
         }
         break;
