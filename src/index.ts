@@ -7,7 +7,7 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
 import { VoiceQueue } from './Classes/VoiceQueue';
-import { firstrun, getRandomInt, downloadAttachments, getFullPath } from './functions/Misc';
+import { firstrun, getRandomInt, getFullPath } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 import { AddCommandState, AddCommandStatus } from './Classes/AddCommandState';
@@ -39,7 +39,7 @@ client.on('message', (message) => {
     if (userMentions.has(message.author.username)) {
       state = userMentions.get(message.author.username);
     } else { // User does not exist, add to collection and process
-      state = new AddCommandState(message.author);
+      state = new AddCommandState();
       userMentions.set(message.author.username, state);
     }
     switch (state.state) {
@@ -63,13 +63,6 @@ client.on('message', (message) => {
         }
         break;
     }
-    // if (message.attachments.size > 0) {
-    //   logger.info('Message has attachments; downloading');
-    //   downloadAttachments(config.audio_path, message.attachments);
-    //   message.reply('you uploaded an audio file. If you want to turn this into a command, reply "@dcbot <command>');
-    // } else {
-    //   message.reply('you called?');
-    // }
     return;
   }
   // Ignore the message if it's not a command
@@ -121,6 +114,7 @@ client.on('message', (message) => {
 /**
  * TODO:
  * - Add commands in DC itself?
+ *  - Add multi commands
  * - Shards for multiple servers at once
  * - Add config file if it doesn't exist
  *    - Interactive run for first set up

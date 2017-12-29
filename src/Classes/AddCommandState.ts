@@ -2,27 +2,33 @@ import { Collection, MessageAttachment, User, Attachment } from 'discord.js';
 import { logger } from '../logger';
 import * as fs from 'fs';
 import * as request from 'request';
-import { WriteStream } from 'fs';
 import * as pathm from 'path';
 
+/**
+ * Represents state of the newly added command
+ */
 export enum AddCommandStatus {
   initialMessage,
   awaitingCommand,
 }
 
+/**
+ * Class to handle adding a new command dynamically through discord using commands and mentions
+ */
 export class AddCommandState {
   public state: AddCommandStatus;
-  public user: User;
   public urls: string[];
   public attachmentPaths: string[];
 
-  constructor(user: User) {
+  constructor() {
     this.state = AddCommandStatus.initialMessage;
-    this.user = user;
     this.urls = [];
     this.attachmentPaths = [];
   }
 
+  /**
+   * Advance the internal state of the object to the next step of adding a command
+   */
   public advanceState() {
     if (this.state !== AddCommandStatus.awaitingCommand) {
       this.state++;
@@ -44,6 +50,10 @@ export class AddCommandState {
     return output;
   }
 
+  /**
+   * Checks if a given path is audio, using the file extention. Currently only checks for wav and mp3
+   * @param attachment Path of the attachment to check
+   */
   private isAudio(attachment: string) {
     const attachmentExtention = attachment.split('.');
     if (['mp3', 'wav'].indexOf(attachmentExtention[attachmentExtention.length - 1]) > -1) {
@@ -52,16 +62,22 @@ export class AddCommandState {
     return false;
   }
 
+  /**
+   * Downloads all the attachments of a message to the given directory.
+   * @param dir path to download the attachments to
+   * @param inputAttachments Collection of MessageAttachments with filename as key
+   */
   public async downloadAttachments(dir: string, inputAttachments: Collection<string, MessageAttachment>) {
     const attachments = await this._downloadAttachments(dir, inputAttachments);
     logger.info('Message attachments: ', attachments);
     this.attachmentPaths = this.attachmentPaths.concat(attachments);
   }
 
-  /*
-  * Downloads attachments from message
-  * @param attachments Attachment collention
-  */
+  /**
+   * Private method to download the attachments of a message to the given directory.
+   * @param dir Path to download the attachments to
+   * @param inputAttachments Collection of MessageAttachments with filename as key
+   */
   private async _downloadAttachments(dir: string, inputAttachments: Collection<string, MessageAttachment>) {
     logger.info('Downloading attachments');
     const attachments = this.getMessageAttachmentsUrls(inputAttachments);
@@ -86,11 +102,17 @@ export class AddCommandState {
     return paths;
   }
 
+  /**
+   * Downloads the individual files of the message to the given dir. Note, uses recursive promise. If the file already exists,
+   * will append _new to the new file, and use that instead.
+   * @param path path to download the file to
+   * @param url url of the attachment
+   */
   private _downloadFileAsync(path: string, url: string): Promise<string> {
     return new Promise((resolve, reject) => {
       fs.open(path, 'wx', (err, fd) => {
         if (err) {
-          if (err.code === 'EEXIST') {
+          if (err.code === 'EEXIST') { // If the file already exists, generate a new path, resolve the promise and handle in the .then() block underneath
             logger.info('File already exists');
             const newPath = pathm.parse(path);
             newPath.name += '_new';
@@ -117,7 +139,7 @@ export class AddCommandState {
             reject(e);
           })
           .on('response', (res) => {
-            if (res.statusCode === 200) {
+            if (res.statusCode === 200) { // Only write data if request was successfull.
               res.pipe(stream)
                 .on('error', (e) => {
                   logger.error('File error: ', e);
@@ -125,14 +147,13 @@ export class AddCommandState {
                   reject(e);
                 })
                 .on('finish', () => {
-                  stream.end();
+                  stream.end(); // End the file stream to complete the promise properly
                 });
             }
           });
       });
     }).then((data: string) => {
-      logger.info('Resolved');
-      return data === path ? data : this._downloadFileAsync(data, url);
+      return data === path ? data : this._downloadFileAsync(data, url); // If the file already exists, call the function again until a new filename is found.
     });
   }
 }

@@ -38,63 +38,10 @@ export function getRandomInt(min: number, max: number) {
 }
 
 /**
- * Gets the urls of message attachments.
- * Returns collection of attachment urls with filename for key
- * @param attachements Collection of message attachments
+ * Check if a given audioFile path is absolute, or retrurn concatenated absolute path from shortcut path
+ * @param audioFile Path to the audio file
+ * @param audioPath Shortcut path where all the audio files are stored
  */
-export function getMessageAttachmentsUrls(attachements: Collection<string, MessageAttachment>) {
-  const output = new Collection<string, string>();
-  for (const i of attachements.entries()) {
-    output.set(i[1].filename, i[1].url);
-  }
-  return output;
-}
-
-export function isAudio(attachment: string) {
-  if (['mp3', 'wav'].indexOf(attachment) > -1) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Downloads attachments from message
- * @param attachments Attachment collention
- */
-export function downloadAttachments(dir: string, inputAttachments: Collection<string, MessageAttachment>) {
-  const attachments = getMessageAttachmentsUrls(inputAttachments);
-  const paths: string[] = [];
-  for (const attachment of attachments.entries()) {
-    if (!isAudio(attachment[0])) {
-      // If the given file isn't audio, just skip it
-      continue;
-    }
-    const path = dir + attachment[0];
-    const url = attachment[1];
-    logger.info(`Received file with url: ${url}. Writing to ${path}`);
-    const stream = fs.createWriteStream(path, { flags: 'wx' });
-    stream.on('error', (e) => {
-      logger.error('File ', e);
-      fs.unlink(path, () => { });
-    });
-    request.get(url)
-      .on('error', (e) => {
-        logger.error('http error', e.message);
-        fs.unlink(path, () => { });
-      })
-      .on('response', (res) => {
-        if (res.statusCode === 200) {
-          res.pipe(stream).on('error', (e) => {
-            logger.error('File error: ', e);
-            fs.unlink(path, () => { });
-          });
-          paths.push(path);
-        }
-      });
-  }
-  return paths;
-}
-
 export function getFullPath(audioFile: string, audioPath: string) {
   if (path.isAbsolute(audioFile)) {
     return audioFile;
