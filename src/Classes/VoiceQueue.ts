@@ -1,7 +1,7 @@
 import { Queue } from 'typescript-collections';
 import * as Discord from 'discord.js';
-import { logger } from './logger';
-import { getFullTextChannelName } from './functions/Channels';
+import { logger } from '../logger';
+import { getFullTextChannelName } from '../functions/Channels';
 
 /**
  * Class to manage queuing and playing of audio clips
@@ -35,15 +35,15 @@ export class VoiceQueue {
    * Play the queue. When the end is reached, recursively call function on remaining items
    */
   private async playQueue() {
-    const items = this._queue.dequeue();
-    if (!this._voiceConnection || items.message.member.voiceChannel.id !== this._voiceConnection.channel.id) {
-      logger.info(`joining channel ${getFullTextChannelName(items.message)}`);
-      this._voiceConnection = await items.message.member.voiceChannel.join();
-      logger.info(`joined channel ${getFullTextChannelName(items.message)}`);
+    const queuedAudio = this._queue.dequeue();
+    if (!this._voiceConnection || queuedAudio.message.member.voiceChannel.id !== this._voiceConnection.channel.id) {
+      logger.info(`joining channel ${getFullTextChannelName(queuedAudio.message)}`);
+      this._voiceConnection = await queuedAudio.message.member.voiceChannel.join();
+      logger.info(`joined channel ${getFullTextChannelName(queuedAudio.message)}`);
     }
-    logger.info(`Playing file ${items.path}`);
+    logger.info(`Playing file ${queuedAudio.path}`);
     this._isPlaying = true;
-    const dispatcher = this._voiceConnection.playFile(items.path);
+    const dispatcher = this._voiceConnection.playFile(queuedAudio.path);
     dispatcher.on('end', (reason) => {
       logger.info('player finished:', reason);
       if (this._queue.isEmpty()) {
@@ -52,7 +52,7 @@ export class VoiceQueue {
       if (this._isPlaying) {
         this.playQueue();
       } else {
-        logger.info(`Queue empty; Leaving channel ${getFullTextChannelName(items.message)}`);
+        logger.info(`Queue empty; Leaving channel ${getFullTextChannelName(queuedAudio.message)}`);
         this._voiceConnection.disconnect();
         this._voiceConnection = undefined;
       }

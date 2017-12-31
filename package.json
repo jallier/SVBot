@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc --watch",
-    "start": "nodemon \"dist/index.js\" --watch \"dist/*.js\" --watch \"config.json\" ",
+    "start": "nodemon \"dist/index.js\" --watch \"dist/\" ",
     "dev": "concurrently \"npm run compile\" \"npm run start\" "
   },
   "keywords": [
@@ -16,12 +16,14 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^8.0.57",
+    "@types/request": "^2.0.9",
     "@types/winston": "^2.3.7",
     "discord.js": "^11.2.1",
     "erlpack": "github:discordapp/erlpack",
     "ffmpeg-binaries": "^3.2.2-3",
     "moment": "^2.19.4",
     "node-opus": "^0.2.7",
+    "request": "^2.83.0",
     "sodium": "2.0.1",
     "typescript": "^2.6.2",
     "typescript-collections": "^1.2.5",
