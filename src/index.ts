@@ -22,6 +22,11 @@ const client = new Discord.Client();
 const voiceQueue = new VoiceQueue();
 const userMentions: Discord.Collection<string, AddCommandState> = new Discord.Collection();
 
+if (!config.token) {
+  logger.warn('No token provided. Please add a token before trying to run the bot');
+  process.exit(1);
+}
+
 client.login(config.token);
 
 // Log that the bot is ready to go
@@ -55,7 +60,7 @@ client.on('message', (message) => {
         logger.info('User sent', message.content);
         const command = message.content.split(' ')[1];
         if (command.startsWith(commandChar)) {
-          message.reply(`Adding command ${command}`);
+          message.reply(`adding command ${command}`);
           logger.info(`Adding command ${command} with path ${state.attachmentPaths[0]}`);
           config.commands.push({ name: command.substring(1), description: 'User added command', audio_file: state.attachmentPaths[0] });
           logger.info(`${JSON.stringify(config, undefined, 2)}`);
@@ -69,9 +74,9 @@ client.on('message', (message) => {
   // Ignore the message if it's not a command
   if (!message.content.startsWith(commandChar) || !message.guild) {
     return;
-  } else if (message.content.startsWith(commandChar) && ['desc', 'description'].indexOf(message.content.substring(1)) > -1) {
+  } else if (message.content.startsWith(commandChar) && ['desc', 'description', 'help'].indexOf(message.content.substring(1)) > -1) {
     // Print all commands and descriptions
-    let output = '';
+    let output = 'These are all the currently stored audio commands:\n';
     for (const command of config.commands) {
       output += `${config.command_char}${command.name}: ${command.description}\n`;
     }
@@ -111,11 +116,19 @@ client.on('message', (message) => {
   }
 });
 
+client.on('error', (error) => {
+  logger.error(error.name, error.message);
+  process.exit(1);
+});
+
 
 /**
  * TODO:
  * - Add commands in DC itself?
+ *  - Add commands in one go from file upload
  *  - Add multi commands
+ *    - Add multi files at once
+ *    - Append more files to existing command?
  * - Shards for multiple servers at once
  * - Add config file if it doesn't exist
  *    - Interactive run for first set up
