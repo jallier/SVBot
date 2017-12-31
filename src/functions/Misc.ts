@@ -4,13 +4,15 @@ import { Collection, MessageAttachment, Message } from 'discord.js';
 import * as path from 'path';
 import * as https from 'https';
 import * as request from 'request';
+import { Config } from '../interfaces/Config';
 
 export function firstrun() {
   if (!fs.existsSync('config.json')) {
     logger.info('config file does not exist. Generating basic file');
     const output = {
-      token: 'Insert your token here. You can get this from the developer section on Discord',
+      token: '',
       command_char: '!',
+      audio_path: process.cwd() + (process.platform === 'win32' ? '\\' : '/'),
       commands: [
         {
           name: 'ping',
@@ -47,4 +49,19 @@ export function getFullPath(audioFile: string, audioPath: string) {
     return audioFile;
   }
   return audioPath + audioFile;
+}
+
+export async function writeConfigAsyncFile(newConfig: Config) {
+  return new Promise((resolve, reject) => {
+    logger.info('Writing config to file');
+    fs.writeFile('config.json', JSON.stringify(newConfig, undefined, 2), (err) => {
+      if (err) {
+        logger.error(err.name, err.message);
+        reject();
+      } else {
+        logger.info('Config successfully written');
+        resolve();
+      }
+    });
+  });
 }

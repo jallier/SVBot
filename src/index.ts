@@ -7,7 +7,7 @@ import * as Discord from 'discord.js';
 import { Queue } from 'typescript-collections';
 import { Config } from './interfaces/Config';
 import { VoiceQueue } from './Classes/VoiceQueue';
-import { firstrun, getRandomInt, getFullPath } from './functions/Misc';
+import { firstrun, getRandomInt, getFullPath, writeConfigAsyncFile } from './functions/Misc';
 import { logger } from './logger';
 import { castToTextChannel } from './functions/Channels';
 import { AddCommandState, AddCommandStatus } from './Classes/AddCommandState';
@@ -59,6 +59,7 @@ client.on('message', (message) => {
           logger.info(`Adding command ${command} with path ${state.attachmentPaths[0]}`);
           config.commands.push({ name: command.substring(1), description: 'User added command', audio_file: state.attachmentPaths[0] });
           logger.info(`${JSON.stringify(config, undefined, 2)}`);
+          writeConfigAsyncFile(config);
           userMentions.delete(message.author.username);
         }
         break;
